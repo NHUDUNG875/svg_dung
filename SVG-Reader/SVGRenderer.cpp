@@ -1,8 +1,13 @@
-﻿#include "SVGRenderer.h"
+﻿#include <windows.h>//
+#include <gdiplus.h>//
+#include "SVGRenderer.h"
 #include "Stroke.h"        
 #include "SVGRectangle.h"  
 #include "SVGCircle.h"    
-#include "SVGElement.h"   
+#include "SVGElement.h" 
+#include "SVGGroup.h"//
+#include "SVGTransform.h"//
+
 namespace Gdiplus {
     struct PointF;
     class Graphics;
@@ -201,8 +206,34 @@ void SVGRenderer::renderFigure(Gdiplus::Graphics& g, const SVGGroup* rootGroup) 
 void SVGRenderer::renderGroup(Gdiplus::Graphics& g, const SVGGroup* rootGroup) {
     if (!rootGroup) return;
 
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix newMatrix = oldMatrix;
+    rootGroup->getTransform().applyToMatrix(newMatrix);
+    g.SetTransform(&newMatrix);
+
+    //Gdiplus::Matrix oldMatrix;
+    //g.GetTransform(&oldMatrix);
+
+    //// Tạo matrix mới với identity
+    //Gdiplus::Matrix newMatrix;
+    //newMatrix.SetMatrix(
+    //    oldMatrix.m11, oldMatrix.m12,
+    //    oldMatrix.m21, oldMatrix.m22,
+    //    oldMatrix.dx, oldMatrix.dy
+    //);
+
+    // Áp dụng transform của group lên newMatrix
+    rootGroup->getTransform().applyToMatrix(newMatrix);
+    g.SetTransform(&newMatrix);
+
+
     const auto& children = rootGroup->getSVGElementArray();
     for (SVGElement* element : children) {
-        element->render(*this, g);
+        if(element)
+            element->render(*this, g);
     }
+
+    g.SetTransform(&oldMatrix);
 }

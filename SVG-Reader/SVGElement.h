@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "SVGStyle.h"
+#include "SVGTransform.h"  // thêm
 
 class SVGRenderer;
 namespace Gdiplus { class Graphics; }
@@ -11,6 +12,7 @@ protected:
 	std::string tag_name;
 	std::string id;
 	SVGStyle style;
+	SVGTransform transform;//thêm
 public:
 	SVGElement();
 	SVGElement(const std::string&, const std::string&, const SVGStyle&);
@@ -26,6 +28,11 @@ public:
 	SVGStyle& getSVGStyle();
 	const SVGStyle& getSVGStyle() const;
 	void setSVGStyle(const SVGStyle&);
+
+	//thêm
+	const SVGTransform& getTransform() const { return transform; }
+	SVGTransform& getTransform() { return transform; }
+	void setTransform(const SVGTransform& t) { transform = t; }
 
 	// polymorphism and separation of concerns
 	virtual void parse(tinyxml2::XMLElement*) = 0;

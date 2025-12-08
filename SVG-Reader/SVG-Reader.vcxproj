@@ -157,6 +157,7 @@
     <ClInclude Include="SVGSquare.h" />
     <ClInclude Include="SVGStyle.h" />
     <ClInclude Include="SVGText.h" />
+    <ClInclude Include="SVGTransform.h" />
     <ClInclude Include="tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +186,7 @@
     <ClCompile Include="SVGSquare.cpp" />
     <ClCompile Include="SVGStyle.cpp" />
     <ClCompile Include="SVGText.cpp" />
+    <ClCompile Include="SVGTransform.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

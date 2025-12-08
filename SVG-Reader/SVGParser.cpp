@@ -1,5 +1,4 @@
 ﻿#include "SVGParser.h"
-
 #include <sstream>
 #include <algorithm>
 #include <iostream>
@@ -99,6 +98,13 @@ void SVGParser::parseAttributes(tinyxml2::XMLElement* xmlNode, SVGElement* eleme
 
         attr = attr->Next();
     }
+    //thêm
+    const char* transformStr = xmlNode->Attribute("transform");
+    if (transformStr) {
+        SVGTransform t = SVGTransform::parse(transformStr);
+        element->setTransform(t);
+    }
+    //
     element->setSVGStyle(currentStyle);
 }
 
