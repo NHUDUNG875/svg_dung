@@ -25,45 +25,65 @@ int CustomColor::clampCustomColorValue(int value) {
     if (value > 255) return 255;
     return value;
 }
-
+// chỉnh sửa để đọc đc màu
 CustomColor CustomColor::fromStringToCustomColor(const std::string& rgbString) {
-    string tempStr = rgbString;
-    tempStr.erase(remove_if(tempStr.begin(), tempStr.end(), ::isspace), tempStr.end());
+    std::string tempStr = rgbString;
+    // bỏ khoảng trắng
+    tempStr.erase(std::remove_if(tempStr.begin(), tempStr.end(), ::isspace), tempStr.end());
 
-    if (tempStr.substr(0, 4) != "rgb(") {
-        return CustomColor(0, 0, 0);
-    }
+    // 1) Hỗ trợ tên màu cơ bản
+    // chuyển về chữ thường để so sánh
+    std::string lower = tempStr;
+    std::transform(lower.begin(), lower.end(), lower.begin(),
+        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
-    size_t start = tempStr.find('(');
-    size_t end = tempStr.find(')');
+    if (lower == "red")    return CustomColor(255, 0, 0);
+    if (lower == "green")  return CustomColor(0, 128, 0);   // SVG "green" chuẩn là #008000
+    if (lower == "blue")   return CustomColor(0, 0, 255);
+    if (lower == "black")  return CustomColor(0, 0, 0);
+    if (lower == "white")  return CustomColor(255, 255, 255);
+    if (lower == "yellow") return CustomColor(255, 255, 0);
+    if (lower == "cyan" || lower == "aqua")   return CustomColor(0, 255, 255);
+    if (lower == "magenta" || lower == "fuchsia") return CustomColor(255, 0, 255);
+    if (lower == "gray" || lower == "grey")   return CustomColor(128, 128, 128);
 
-    if (start == string::npos || end == string::npos || end <= start) {
-        return CustomColor(0, 0, 0);
-    }
+    // 2) Hỗ trợ dạng rgb(r,g,b)
+    if (tempStr.size() >= 4 && tempStr.substr(0, 4) == "rgb(") {
 
-    string values = tempStr.substr(start + 1, end - start - 1);
-    stringstream ss(values);
-    string segment;
-    int components[3] = { 0, 0, 0 };
-    int i = 0;
+        size_t start = tempStr.find('(');
+        size_t end = tempStr.find(')');
 
-    while (getline(ss, segment, ',') && i < 3) {
-        try {
-            if (!segment.empty()) {
-                components[i] = std::stoi(segment);
+        if (start == std::string::npos || end == std::string::npos || end <= start) {
+            return CustomColor(0, 0, 0);
+        }
+
+        std::string values = tempStr.substr(start + 1, end - start - 1);
+        std::stringstream ss(values);
+        std::string segment;
+        int components[3] = { 0, 0, 0 };
+        int i = 0;
+
+        while (std::getline(ss, segment, ',') && i < 3) {
+            try {
+                if (!segment.empty()) {
+                    components[i] = std::stoi(segment);
+                }
             }
+            catch (...) {
+                components[i] = 0;
+            }
+            ++i;
         }
-        catch (const std::exception& e) {
-            components[i] = 0;
-        }
-        i++;
+
+        return CustomColor(
+            clampCustomColorValue(components[0]),
+            clampCustomColorValue(components[1]),
+            clampCustomColorValue(components[2])
+        );
     }
 
-    return CustomColor(
-        clampCustomColorValue(components[0]),
-        clampCustomColorValue(components[1]),
-        clampCustomColorValue(components[2])
-    );
+    // 3) Không nhận ra định dạng → trả đen
+    return CustomColor(0, 0, 0);
 }
 
 std::string CustomColor::fromCustomColorToString() const {

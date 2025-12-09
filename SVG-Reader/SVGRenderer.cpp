@@ -8,6 +8,8 @@
 #include "SVGGroup.h"//
 #include "SVGTransform.h"//
 
+//using namespace  Gdiplus;
+
 namespace Gdiplus {
     struct PointF;
     class Graphics;
@@ -37,6 +39,13 @@ SVGRenderer::SVGRenderer() : zoom(1.0f), rotate(0.0f) {}
 void SVGRenderer::renderRectangle(Gdiplus::Graphics& g, const SVGRectangle* rect) {
     if (!rect) return;
 
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    rect->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
     Gdiplus::Point p = rect->getTopLeftCorner();
     Gdiplus::PointF topLeft(static_cast<float>(p.X), static_cast<float>(p.Y));
     float w = rect->getWidth();
@@ -51,10 +60,18 @@ void SVGRenderer::renderRectangle(Gdiplus::Graphics& g, const SVGRectangle* rect
 
         g.DrawRectangle(&pen, topLeft.X, topLeft.Y, w, h);
     }
+
+    g.SetTransform(&oldMatrix);
 }
 
 void SVGRenderer::renderCircle(Gdiplus::Graphics& g, const SVGCircle* circle) {
     if (!circle) return;
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    circle->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
 
     // get infor
     Gdiplus::PointF center = circle->getCenter();
@@ -82,15 +99,22 @@ void SVGRenderer::renderCircle(Gdiplus::Graphics& g, const SVGCircle* circle) {
         // draw Stroke
         g.DrawEllipse(&pen, center.X - radius, center.Y - radius, diameter, diameter);
     }
+    g.SetTransform(&oldMatrix);
 }
 
 void SVGRenderer::renderEllipse(Gdiplus::Graphics& g, const SVGEllipse* ellipse) {
     if (!ellipse) return;
 
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    ellipse->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
     PointF center = ellipse->getCenter();
     float rx = ellipse->getRadiusX();
     float ry = ellipse->getRadiusY();
-
 
     Gdiplus::SolidBrush brush(ellipse->getSVGStyle().getGdiFillColor());
     g.FillEllipse(&brush, center.X - rx, center.Y - ry, rx * 2, ry * 2);
@@ -104,9 +128,19 @@ void SVGRenderer::renderEllipse(Gdiplus::Graphics& g, const SVGEllipse* ellipse)
         Gdiplus::Pen pen(strokeColor, strokeW);
         g.DrawEllipse(&pen, center.X - rx, center.Y - ry, rx * 2, ry * 2);
     }
+
+    g.SetTransform(&oldMatrix);
 }
+
 void SVGRenderer::renderLine(Gdiplus::Graphics& g, const SVGLine* line) {
     if (!line) return;
+
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    line->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
 
     PointF start = line->getStartPoint();
     PointF end = line->getEndPoint();
@@ -121,9 +155,18 @@ void SVGRenderer::renderLine(Gdiplus::Graphics& g, const SVGLine* line) {
         Gdiplus::Pen pen(strokeColor, strokeW);
         g.DrawLine(&pen, start, end);
     }
+    g.SetTransform(&oldMatrix);
+
 }
 void SVGRenderer::renderPolygon(Gdiplus::Graphics& g, const SVGPolygon* polygon) {
     if (!polygon) return;
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    polygon->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
     const std::vector<CustomPoint>& customPoints = polygon->getPoints();
     std::vector<PointF> gdiPoints;
     gdiPoints.reserve(customPoints.size());
@@ -141,10 +184,18 @@ void SVGRenderer::renderPolygon(Gdiplus::Graphics& g, const SVGPolygon* polygon)
         Gdiplus::Pen pen(strokeObj->strokeColor, strokeObj->strokeWidth);
         g.DrawPolygon(&pen, gdiPoints.data(), static_cast<INT>(gdiPoints.size()));
     }
+    g.SetTransform(&oldMatrix);
 }
 
 void SVGRenderer::renderPolyline(Gdiplus::Graphics& g, const SVGPolyline* polyline) {
     if (!polyline) return;
+
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    polyline->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
 
     std::vector<PointF> gdiPoints;
     const auto& customPoints = polyline->getPoints();
@@ -176,9 +227,18 @@ void SVGRenderer::renderPolyline(Gdiplus::Graphics& g, const SVGPolyline* polyli
         Gdiplus::Pen pen(finalStrokeColor, strokeW);
         g.DrawLines(&pen, gdiPoints.data(), static_cast<INT>(gdiPoints.size()));
     }
+    g.SetTransform(&oldMatrix);
 }
+
 void SVGRenderer::renderText(Gdiplus::Graphics& g, const SVGText* text) {
     if (!text) return;
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    text->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
     PointF pos = text->getStart();
     std::wstring content = text->getContent();
     Color color = text->getSVGStyle().getGdiFillColor();
@@ -188,51 +248,50 @@ void SVGRenderer::renderText(Gdiplus::Graphics& g, const SVGText* text) {
     Gdiplus::SolidBrush brush(color);
     PointF new_pos(pos.X, pos.Y - text->getFontSize() * 1.0f);
     g.DrawString(content.c_str(), -1, &font, new_pos, &brush);
+    
+    g.SetTransform(&oldMatrix);
 }
 
 void SVGRenderer::renderSquare(Gdiplus::Graphics& g, const SVGSquare* square) {
     if (!square) return;
+    Gdiplus::Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Gdiplus::Matrix localMatrix;
+    square->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
     PointF topLeft = square->getTopLeftCorner();
     float side = square->getHeight();
     Gdiplus::SolidBrush brush(square->getSVGStyle().getGdiFillColor());
     Gdiplus::Pen pen(square->getSVGStyle().getStroke()->strokeColor, square->getSVGStyle().getStroke()->strokeWidth);
     g.FillRectangle(&brush, topLeft.X, topLeft.Y, side, side);
     g.DrawRectangle(&pen, topLeft.X, topLeft.Y, side, side);
+    
+    g.SetTransform(&oldMatrix);
 }
 void SVGRenderer::renderFigure(Gdiplus::Graphics& g, const SVGGroup* rootGroup) {
     if (!rootGroup) return;
     rootGroup->render(*this, g);
 }
+
 void SVGRenderer::renderGroup(Gdiplus::Graphics& g, const SVGGroup* rootGroup) {
     if (!rootGroup) return;
 
     Gdiplus::Matrix oldMatrix;
     g.GetTransform(&oldMatrix);
 
-    Gdiplus::Matrix newMatrix = oldMatrix;
-    rootGroup->getTransform().applyToMatrix(newMatrix);
-    g.SetTransform(&newMatrix);
+    Gdiplus::Matrix groupMatrix; 
+    rootGroup->getTransform().applyToMatrix(groupMatrix);
 
-    //Gdiplus::Matrix oldMatrix;
-    //g.GetTransform(&oldMatrix);
-
-    //// Tạo matrix mới với identity
-    //Gdiplus::Matrix newMatrix;
-    //newMatrix.SetMatrix(
-    //    oldMatrix.m11, oldMatrix.m12,
-    //    oldMatrix.m21, oldMatrix.m22,
-    //    oldMatrix.dx, oldMatrix.dy
-    //);
-
-    // Áp dụng transform của group lên newMatrix
-    rootGroup->getTransform().applyToMatrix(newMatrix);
-    g.SetTransform(&newMatrix);
+    g.MultiplyTransform(&groupMatrix);
 
 
     const auto& children = rootGroup->getSVGElementArray();
     for (SVGElement* element : children) {
-        if(element)
+        if (element) {
             element->render(*this, g);
+        }
     }
 
     g.SetTransform(&oldMatrix);

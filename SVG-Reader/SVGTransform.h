@@ -35,3 +35,4 @@ public:
 
     static SVGTransform parse(const std::string& str); // parse chuỗi "translate(...) rotate(...) ..."
 };
+

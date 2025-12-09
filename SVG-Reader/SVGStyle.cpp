@@ -67,11 +67,13 @@ Gdiplus::Color SVGStyle::getGdiFillColor() const {
         baseColor.GetB()
     );
 }
+
 void SVGStyle::parse(const std::string& styleStr) {
     std::stringstream ss(styleStr);
     std::string item;
-    while (getline(ss, item, ';')) {
-        item.erase(remove_if(item.begin(), item.end(), ::isspace), item.end());
+
+    while (std::getline(ss, item, ';')) {
+        item.erase(std::remove_if(item.begin(), item.end(), ::isspace), item.end());
         if (item.empty()) continue;
 
         size_t pos = item.find(':');
@@ -80,21 +82,42 @@ void SVGStyle::parse(const std::string& styleStr) {
         std::string key = item.substr(0, pos);
         std::string value = item.substr(pos + 1);
 
-        if (key == "fill") this->setFillColor(CustomColor::fromStringToCustomColor(value));
-        else if (key == "fill-opacity") this->setFillOpacity(stof(value));
-        else if (key.find("stroke") != std::string::npos) {
-            Stroke* stroke = this->getStroke();
-            std::string s = styleStr;
-            s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
-            size_t pos = s.find(':');
-            if (pos == std::string::npos) return;
-            std::string key = s.substr(0, pos);
-            std::string value = s.substr(pos + 1);
-            if (key == "stroke") stroke->strokeColor = CustomColor::fromStringToCustomColor(value);
-            else if (key == "stroke-width") stroke->strokeWidth = stof(value);
-            else if (key == "stroke-opacity") stroke->strokeOpacity = stof(value);
+        if (key == "fill") {
+            this->setFillColor(CustomColor::fromStringToCustomColor(value));
+        }
+        else if (key == "fill-opacity") {
+            try {
+                this->setFillOpacity(std::stof(value));
+            }
+            catch (...) {
+                // giữ nguyên fillOpacity cũ nếu lỗi
+            }
+        }
+        else if (key == "stroke" || key == "stroke-width" || key == "stroke-opacity") {
+            Stroke* s = this->getStroke();
+            if (!s) {
+                Stroke tmp;
+                this->setStroke(&tmp);
+                s = this->getStroke();
+            }
 
-            this->setStroke(stroke);
+            if (!s) continue;
+
+            if (key == "stroke") {
+                s->strokeColor = CustomColor::fromStringToCustomColor(value);
+            }
+            else if (key == "stroke-width") {
+                try {
+                    s->strokeWidth = std::stof(value);
+                }
+                catch (...) {}
+            }
+            else if (key == "stroke-opacity") {
+                try {
+                    s->strokeOpacity = std::stof(value);
+                }
+                catch (...) {}
+            }
         }
     }
 }

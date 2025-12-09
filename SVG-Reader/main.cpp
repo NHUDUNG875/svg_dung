@@ -30,7 +30,7 @@ using namespace std;
 #pragma comment (lib,"kernel32.lib")
 #endif
 
-const std::string SVG_FILENAME = "D:\sample.svg";
+const std::string SVG_FILENAME = "D:/Download/sample1.svg";
 const LPCWSTR WINDOW_CLASS_NAME = L"SVGReaderWindow";
 const LPCWSTR WINDOW_TITLE = L"SVG Reader Demo";
 
