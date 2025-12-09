@@ -7,6 +7,7 @@
 #include "SVGElement.h" 
 #include "SVGGroup.h"//
 #include "SVGTransform.h"//
+#include "SVGPath.h"
 
 //using namespace  Gdiplus;
 
@@ -278,7 +279,7 @@ void SVGRenderer::renderFigure(Gdiplus::Graphics& g, const SVGGroup* rootGroup) 
 void SVGRenderer::renderGroup(Gdiplus::Graphics& g, const SVGGroup* rootGroup) {
     if (!rootGroup) return;
 
-    Gdiplus::Matrix oldMatrix;
+    ơ:Matrix oldMatrix;
     g.GetTransform(&oldMatrix);
 
     Gdiplus::Matrix groupMatrix; 
@@ -292,6 +293,92 @@ void SVGRenderer::renderGroup(Gdiplus::Graphics& g, const SVGGroup* rootGroup) {
         if (element) {
             element->render(*this, g);
         }
+    }
+
+    g.SetTransform(&oldMatrix);
+}
+
+void SVGRenderer::renderPath(Gdiplus::Graphics& g, const SVGPath* path) {
+    if (!path) return;
+
+    Matrix oldMatrix;
+    g.GetTransform(&oldMatrix);
+
+    Matrix localMatrix;
+    path->getTransform().applyToMatrix(localMatrix);
+    g.MultiplyTransform(&localMatrix);
+
+    Gdiplus::GraphicsPath gp;
+    Gdiplus::PointF current(0.0f, 0.0f);
+    Gdiplus::PointF start(0.0f, 0.0f);
+
+    for (const auto& cmd : path->getCommands()) {
+        switch (cmd.type) {
+        case PathCommandType::MoveTo: {
+            float x = cmd.params[0], y = cmd.params[1];
+            current = Gdiplus::PointF(x, y);
+            start = current;
+            break;
+        }
+        case PathCommandType::LineTo: {
+            float x = cmd.params[0], y = cmd.params[1];
+            Gdiplus::PointF p(x, y);
+            gp.AddLine(current, p);
+            current = p;
+            break;
+        }
+        case PathCommandType::HLineTo: {
+            float x = cmd.params[0];
+            Gdiplus::PointF p(x, current.Y);
+            gp.AddLine(current, p);
+            current = p;
+            break;
+        }
+        case PathCommandType::VLineTo: {
+            float y = cmd.params[0];
+            Gdiplus::PointF p(current.X, y);
+            gp.AddLine(current, p);
+            current = p;
+            break;
+        }
+        case PathCommandType::ClosePath: {
+            gp.AddLine(current, start);
+            current = start;
+            break;
+        }
+        case PathCommandType::CubicBezier: {
+            Gdiplus::PointF p1(cmd.params[0], cmd.params[1]);
+            Gdiplus::PointF p2(cmd.params[2], cmd.params[3]);
+            Gdiplus::PointF p3(cmd.params[4], cmd.params[5]);
+            gp.AddBezier(current, p1, p2, p3);
+            current = p3;
+            break;
+        }
+        case PathCommandType::SmoothCubicBezier: {
+            Gdiplus::PointF p1(cmd.params[0], cmd.params[1]); // đã tính sẵn trong parse
+            Gdiplus::PointF p2(cmd.params[2], cmd.params[3]);
+            Gdiplus::PointF p3(cmd.params[4], cmd.params[5]);
+            gp.AddBezier(current, p1, p2, p3);
+            current = p3;
+            break;
+        }
+        }
+    }
+
+    const SVGStyle& st = path->getSVGStyle();
+    Color fillColor = st.getGdiFillColor();
+    Stroke* strokeObj = st.getStroke();
+
+    if (fillColor.GetA() > 0) {
+        SolidBrush brush(fillColor);
+        g.FillPath(&brush, &gp);
+    }
+    if (strokeObj) {
+        Color strokeColor = strokeObj->getGdiColor();
+        float strokeW = strokeObj->strokeWidth;
+        if (strokeW <= 0.0f) strokeW = 1.0f;
+        Pen pen(strokeColor, strokeW);
+        g.DrawPath(&pen, &gp);
     }
 
     g.SetTransform(&oldMatrix);

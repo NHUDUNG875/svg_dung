@@ -8,6 +8,7 @@
 #include "SVGText.h"
 #include "SVGSquare.h"
 #include "SVGGroup.h"
+#include "SVGPath.h"
 
 class SVGGroup;
 
@@ -35,4 +36,5 @@ public:
     void renderSquare(Gdiplus::Graphics& g, const SVGSquare* square);
     void renderFigure(Gdiplus::Graphics& g, const SVGGroup* rootGroup);
     void renderGroup(Gdiplus::Graphics& g, const SVGGroup* rootGroup);
+    void renderPath(Gdiplus::Graphics& g, const SVGPath* path);
 };

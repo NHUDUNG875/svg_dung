@@ -149,6 +149,7 @@
     <ClInclude Include="SVGGroup.h" />
     <ClInclude Include="SVGLine.h" />
     <ClInclude Include="SVGParser.h" />
+    <ClInclude Include="SVGPath.h" />
     <ClInclude Include="SVGPolygon.h" />
     <ClInclude Include="SVGPolyline.h" />
     <ClInclude Include="SVGPolyshapeBase.h" />
@@ -178,6 +179,7 @@
     <ClCompile Include="SVGGroup.cpp" />
     <ClCompile Include="SVGLine.cpp" />
     <ClCompile Include="SVGParser.cpp" />
+    <ClCompile Include="SVGPath.cpp" />
     <ClCompile Include="SVGPolygon.cpp" />
     <ClCompile Include="SVGPolyline.cpp" />
     <ClCompile Include="SVGPolyshapeBase.cpp" />

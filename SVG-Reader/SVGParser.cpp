@@ -73,7 +73,15 @@ void SVGParser::parseAttributes(tinyxml2::XMLElement* xmlNode, SVGElement* eleme
             this->parseStyle(currentStyle, value);
         }
         else if (name == "fill") {
-            currentStyle.setFillColor(CustomColor::fromStringToCustomColor(value));
+            if (value == "none") {
+                currentStyle.setFillOpacity(0.0f);
+            }
+            else {
+                currentStyle.setFillColor(CustomColor::fromStringToCustomColor(value));
+                if (currentStyle.getFillOpacity() <= 0.0f) {
+                    currentStyle.setFillOpacity(1.0f);
+                }
+            }
         }
         else if (name == "fill-opacity") {
             try { currentStyle.setFillOpacity(std::stof(value)); }

@@ -11,6 +11,8 @@
 #include "SVGSquare.h"
 #include "SVGText.h"
 #include "SVGGroup.h"
+#include "SVGPath.h"//
+using namespace std;
 
 SVGFactoryPattern::SVGFactoryPattern() {
     ElementID["circle"] = 1;
@@ -22,6 +24,7 @@ SVGFactoryPattern::SVGFactoryPattern() {
     ElementID["square"] = 7;
     ElementID["text"] = 8;
     ElementID["g"] = 9;
+    ElementID["path"] = 10;
 }
 
 
@@ -52,6 +55,8 @@ SVGElement* SVGFactoryPattern::getElement(std::string tagname) {
         return new SVGText();
     case 9:
         return new SVGGroup();
+    case 10:
+        return new SVGPath();//
     default:
         throw std::runtime_error("Found tag - " + tagname + " but mapped ID is invalid");
     }
@@ -60,3 +65,4 @@ SVGElement* SVGFactoryPattern::getElement(std::string tagname) {
 const std::unordered_map<std::string, int>& SVGFactoryPattern::getElementID() const {
     return this->ElementID;
 }
+

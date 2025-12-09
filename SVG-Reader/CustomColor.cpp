@@ -47,38 +47,39 @@ CustomColor CustomColor::fromStringToCustomColor(const std::string& rgbString) {
     if (lower == "magenta" || lower == "fuchsia") return CustomColor(255, 0, 255);
     if (lower == "gray" || lower == "grey")   return CustomColor(128, 128, 128);
 
-    // 2) Hỗ trợ dạng rgb(r,g,b)
-    if (tempStr.size() >= 4 && tempStr.substr(0, 4) == "rgb(") {
-
+    // 2) Hỗ trợ dạng rgb(...) / rgba(...)
+    if (tempStr.rfind("rgb", 0) == 0) {   // bắt đầu bằng "rgb"
         size_t start = tempStr.find('(');
         size_t end = tempStr.find(')');
 
-        if (start == std::string::npos || end == std::string::npos || end <= start) {
+        if (start == std::string::npos || end == std::string::npos || end <= start)
             return CustomColor(0, 0, 0);
-        }
 
         std::string values = tempStr.substr(start + 1, end - start - 1);
         std::stringstream ss(values);
         std::string segment;
-        int components[3] = { 0, 0, 0 };
+        int r = 0, g = 0, b = 0;
+        float a = 1.0f;
         int i = 0;
 
-        while (std::getline(ss, segment, ',') && i < 3) {
+        while (std::getline(ss, segment, ',') && i < 4) {
             try {
                 if (!segment.empty()) {
-                    components[i] = std::stoi(segment);
+                    if (i == 0) r = std::stoi(segment);
+                    else if (i == 1) g = std::stoi(segment);
+                    else if (i == 2) b = std::stoi(segment);
+                    else if (i == 3) a = std::stof(segment); // alpha 0..1
                 }
             }
-            catch (...) {
-                components[i] = 0;
-            }
+            catch (...) {}
             ++i;
         }
 
+        // tạm thời: chỉ lưu r,g,b; alpha sẽ xử lý ở SVGStyle::setFillOpacity
         return CustomColor(
-            clampCustomColorValue(components[0]),
-            clampCustomColorValue(components[1]),
-            clampCustomColorValue(components[2])
+            clampCustomColorValue(r),
+            clampCustomColorValue(g),
+            clampCustomColorValue(b)
         );
     }
 
