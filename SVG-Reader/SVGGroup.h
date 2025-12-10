@@ -8,15 +8,13 @@
 class SVGGroup : public SVGElement {
 private:
 
-
     std::vector<SVGElement*> ElementArray;
     SVGGroup* parent;
 
     float width = 0.0f;     
     float height = 0.0f;   
     std::string viewBox;  
-    // std::string transform;  
-
+   
 public:
 
 

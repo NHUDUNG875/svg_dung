@@ -383,3 +383,4 @@ void SVGRenderer::renderPath(Gdiplus::Graphics& g, const SVGPath* path) {
 
     g.SetTransform(&oldMatrix);
 }
+

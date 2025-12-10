@@ -98,3 +98,10 @@ void SVGGroup::parse(tinyxml2::XMLElement* node) {
 void SVGGroup::render(SVGRenderer& r, Gdiplus::Graphics& g) const {
     r.renderGroup(g, this);
 }
+
+void SVGGroup::printDebugAttributes(std::ostream& os) const {
+    os << "Group(tag=" << getTagName()
+        << ", id=" << getId()
+        << ", children=" << ElementArray.size()
+        << ")\n";
+}

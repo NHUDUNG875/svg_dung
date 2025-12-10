@@ -31,7 +31,8 @@ SVGFactoryPattern::SVGFactoryPattern() {
 SVGElement* SVGFactoryPattern::getElement(std::string tagname) {
     auto it = ElementID.find(tagname);
     if (it == ElementID.end()) {
-        throw std::out_of_range("Cannot find the type of object for tag: " + tagname);
+        //throw std::out_of_range("Cannot find the type of object for tag: " + tagname);
+        return nullptr;
     }
 
     int numid = it->second;
