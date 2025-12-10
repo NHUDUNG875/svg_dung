@@ -3,6 +3,7 @@
 #include "tinyxml2.h"
 #include <cctype>
 #include <sstream>
+#include <vector>
 
 SVGPath::SVGPath() : SVGElement() {
     this->setTagName("path");
@@ -12,57 +13,36 @@ SVGElement* SVGPath::clone() const {
     return new SVGPath(*this);
 }
 
-// --- hàm phụ: đọc 1 số float từ chuỗi, tự skip space/comma ---
-static bool readFloat(const string& s, size_t& pos, float& out) {
-    while (pos < s.size() && (isspace((unsigned char)s[pos]) || s[pos] == ',')) {
-        ++pos;
+// Helper: Bỏ qua khoảng trắng và dấu phẩy
+static void skipSpacesAndCommas(const std::string& s, size_t& pos) {
+    while (pos < s.size()) {
+        char ch = s[pos];
+        if (std::isspace((unsigned char)ch) || ch == ',')
+            ++pos;
+        else
+            break;
     }
+}
+
+// Helper: Đọc 1 số float
+static bool parseFloatToken(const std::string& s, size_t& pos, float& out) {
+    skipSpacesAndCommas(s, pos);
     if (pos >= s.size()) return false;
 
     size_t start = pos;
- 
+    // Dấu +/-
     if (s[pos] == '+' || s[pos] == '-') ++pos;
-    while (pos < s.size() && (isdigit((unsigned char)s[pos]) || s[pos] == '.')) {
-        ++pos;
-    }
-    if (start == pos) return false;
-
-    try {
-        out = stof(s.substr(start, pos - start));
-    }
-    catch (...) {
-        return false;
-    }
-    return true;
-}
-
-static void skipSpaces(const std::string& s, size_t& pos) {
-    while (pos < s.size() && std::isspace(static_cast<unsigned char>(s[pos]))) {
-        ++pos;
-    }
-}
-
-static bool parseFloat(const std::string& s, size_t& pos, float& out) {
-    skipSpaces(s, pos);
-    if (pos >= s.size()) return false;
-
-    size_t start = pos;
-    if (s[pos] == '+' || s[pos] == '-') {
-        ++pos;
-    }
 
     bool hasDigit = false;
-    while (pos < s.size() && (std::isdigit(static_cast<unsigned char>(s[pos])) || s[pos] == '.')) {
+    while (pos < s.size() && (std::isdigit((unsigned char)s[pos]) || s[pos] == '.')) {
         hasDigit = true;
         ++pos;
     }
-
+    // Số mũ e/E
     if (pos < s.size() && (s[pos] == 'e' || s[pos] == 'E')) {
         ++pos;
-        if (pos < s.size() && (s[pos] == '+' || s[pos] == '-')) {
-            ++pos;
-        }
-        while (pos < s.size() && std::isdigit(static_cast<unsigned char>(s[pos]))) {
+        if (pos < s.size() && (s[pos] == '+' || s[pos] == '-')) ++pos;
+        while (pos < s.size() && std::isdigit((unsigned char)s[pos])) {
             hasDigit = true;
             ++pos;
         }
@@ -74,262 +54,156 @@ static bool parseFloat(const std::string& s, size_t& pos, float& out) {
         out = std::stof(s.substr(start, pos - start));
         return true;
     }
-    catch (...) {
-        return false;
-    }
+    catch (...) { return false; }
 }
 
-
-static std::vector<float> parseNumberList(const std::string& s, size_t& pos, int expectedCount) {
-    std::vector<float> nums;
-    nums.reserve(expectedCount);
-
-    for (int i = 0; i < expectedCount; ++i) {
-        skipSpaces(s, pos);
-
-        if (pos < s.size() && s[pos] == ',') {
-            ++pos;
-            skipSpaces(s, pos);
-        }
-
-        float value;
-        if (!parseFloat(s, pos, value)) {
-            break;
-        }
-        nums.push_back(value);
-    }
-
-    return nums;
-}
-
-// đọc thuộc tính d 
 void SVGPath::parse(tinyxml2::XMLElement* node) {
+    SVGElement::parse(node);
+
     const char* dAttr = node->Attribute("d");
     if (!dAttr) return;
 
     std::string d = dAttr;
     size_t pos = 0;
     char cmd = 0;
+
     float currentX = 0.0f, currentY = 0.0f;
+    float startX = 0.0f, startY = 0.0f;
     float lastCtrlX = 0.0f, lastCtrlY = 0.0f;
+
     while (pos < d.size()) {
-        // bỏ khoảng trắng
-        while (pos < d.size() && isspace((unsigned char)d[pos])) ++pos;
+        skipSpacesAndCommas(d, pos);
         if (pos >= d.size()) break;
 
         char c = d[pos];
-        if (isalpha((unsigned char)c)) {
-            cmd = c;          // GIỮ nguyên hoa/thường
+        // Nếu là ký tự chữ cái -> là lệnh mới
+        if (std::isalpha((unsigned char)c)) {
+            cmd = c;
             ++pos;
         }
-        if (cmd == 0) { ++pos; continue; }
+        // Nếu không phải chữ cái -> dùng lại lệnh cũ (implicit command)
 
-        switch (cmd) {
-            // ---------- M / m ----------
-        case 'M':
-        case 'm': {
-            bool isRel = (cmd == 'm');
+        bool isRel = (cmd >= 'a' && cmd <= 'z');
+        char absCmd = (char)std::toupper((unsigned char)cmd);
+
+        switch (absCmd) {
+        case 'M': {
             float x, y;
-            if (!readFloat(d, pos, x) || !readFloat(d, pos, y)) break;
-
+            if (!parseFloatToken(d, pos, x) || !parseFloatToken(d, pos, y)) break;
             if (isRel) { x += currentX; y += currentY; }
 
             PathCommand pc;
             pc.type = PathCommandType::MoveTo;
             pc.params = { x, y };
             commands.push_back(pc);
+
             currentX = x; currentY = y;
-
-            // các cặp tiếp theo (nếu có) coi như L / l
-            while (true) {
-                float x2, y2;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, x2) || !readFloat(d, pos, y2)) {
-                    pos = savePos;
-                    break;
-                }
-                if (isRel) { x2 += currentX; y2 += currentY; }
-
-                PathCommand lc;
-                lc.type = PathCommandType::LineTo;
-                lc.params = { x2, y2 };
-                commands.push_back(lc);
-                currentX = x2; currentY = y2;
-            }
+            startX = x; startY = y;
+            // Sau M/m, nếu còn số thì hiểu là L/l
+            cmd = (isRel) ? 'l' : 'L';
             break;
         }
+        case 'L': {
+            float x, y;
+            if (!parseFloatToken(d, pos, x) || !parseFloatToken(d, pos, y)) break;
+            if (isRel) { x += currentX; y += currentY; }
 
-                // ---------- L / l ----------
-        case 'L':
-        case 'l': {
-            bool isRel = (cmd == 'l');
-            while (true) {
-                float x, y;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, x) || !readFloat(d, pos, y)) {
-                    pos = savePos;
-                    break;
-                }
-                if (isRel) { x += currentX; y += currentY; }
-
-                PathCommand pc;
-                pc.type = PathCommandType::LineTo;
-                pc.params = { x, y };
-                commands.push_back(pc);
-                currentX = x; currentY = y;
-            }
+            PathCommand pc;
+            pc.type = PathCommandType::LineTo;
+            pc.params = { x, y };
+            commands.push_back(pc);
+            currentX = x; currentY = y;
             break;
         }
+        case 'H': {
+            float x;
+            if (!parseFloatToken(d, pos, x)) break;
+            if (isRel) x += currentX;
 
-                // ---------- H / h ----------
-        case 'H':
-        case 'h': {
-            bool isRel = (cmd == 'h');
-            while (true) {
-                float x;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, x)) {
-                    pos = savePos;
-                    break;
-                }
-                if (isRel) x += currentX;
-
-                PathCommand pc;
-                pc.type = PathCommandType::HLineTo;
-                pc.params = { x };
-                commands.push_back(pc);
-                currentX = x;
-            }
+            PathCommand pc;
+            pc.type = PathCommandType::HLineTo;
+            pc.params = { x };
+            commands.push_back(pc);
+            currentX = x;
             break;
         }
+        case 'V': {
+            float y;
+            if (!parseFloatToken(d, pos, y)) break;
+            if (isRel) y += currentY;
 
-                // ---------- V / v ----------
-        case 'V':
-        case 'v': {
-            bool isRel = (cmd == 'v');
-            while (true) {
-                float y;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, y)) {
-                    pos = savePos;
-                    break;
-                }
-                if (isRel) y += currentY;
-
-                PathCommand pc;
-                pc.type = PathCommandType::VLineTo;
-                pc.params = { y };
-                commands.push_back(pc);
-                currentY = y;
-            }
+            PathCommand pc;
+            pc.type = PathCommandType::VLineTo;
+            pc.params = { y };
+            commands.push_back(pc);
+            currentY = y;
             break;
         }
+        case 'C': {
+            float x1, y1, x2, y2, x, y;
+            if (!parseFloatToken(d, pos, x1) || !parseFloatToken(d, pos, y1) ||
+                !parseFloatToken(d, pos, x2) || !parseFloatToken(d, pos, y2) ||
+                !parseFloatToken(d, pos, x) || !parseFloatToken(d, pos, y)) break;
 
-                // ---------- C / c ----------
-// ---------- C / c ----------
-// ---------- C / c ----------
-        case 'C':
-        case 'c': {
-            bool isRel = (cmd == 'c');
-            while (true) {
-                float x1, y1, x2, y2, x, y;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, x1) || !readFloat(d, pos, y1) ||
-                    !readFloat(d, pos, x2) || !readFloat(d, pos, y2) ||
-                    !readFloat(d, pos, x) || !readFloat(d, pos, y)) {
-                    pos = savePos;
-                    break;
-                }
-
-                if (isRel) {
-                    x1 += currentX; y1 += currentY;
-                    x2 += currentX; y2 += currentY;
-                    x += currentX; y += currentY;
-                }
-
-                PathCommand pc;
-                pc.type = PathCommandType::CubicBezier;
-                pc.params = { x1, y1, x2, y2, x, y };
-                commands.push_back(pc);
-
-                // Cập nhật: điểm điều khiển cuối là control 2
-                lastCtrlX = x2;
-                lastCtrlY = y2;
-                currentX = x;
-                currentY = y;
+            if (isRel) {
+                x1 += currentX; y1 += currentY;
+                x2 += currentX; y2 += currentY;
+                x += currentX; y += currentY;
             }
+
+            PathCommand pc;
+            pc.type = PathCommandType::CubicBezier;
+            pc.params = { x1, y1, x2, y2, x, y };
+            commands.push_back(pc);
+
+            lastCtrlX = x2; lastCtrlY = y2;
+            currentX = x; currentY = y;
             break;
         }
+        case 'S': {
+            float x2, y2, x, y;
+            if (!parseFloatToken(d, pos, x2) || !parseFloatToken(d, pos, y2) ||
+                !parseFloatToken(d, pos, x) || !parseFloatToken(d, pos, y)) break;
 
-                // ---------- S / s ----------
-        case 'S':
-        case 's': {
-            bool isRel = (cmd == 's');
-            while (true) {
-                float x2, y2, x, y;
-                size_t savePos = pos;
-                if (!readFloat(d, pos, x2) || !readFloat(d, pos, y2) ||
-                    !readFloat(d, pos, x) || !readFloat(d, pos, y)) {
-                    pos = savePos;
-                    break;
+            float x1 = currentX, y1 = currentY;
+            // Tính điểm điều khiển đối xứng
+            if (!commands.empty()) {
+                PathCommandType prevType = commands.back().type;
+                if (prevType == PathCommandType::CubicBezier || prevType == PathCommandType::SmoothCubicBezier) {
+                    x1 = 2.0f * currentX - lastCtrlX;
+                    y1 = 2.0f * currentY - lastCtrlY;
                 }
-
-                // Nếu lệnh trước đó KHÔNG phải C/c/S/s thì
-                // điểm điều khiển 1 trùng với current point
-                float x1, y1;
-                if (commands.empty()) {
-                    x1 = currentX;
-                    y1 = currentY;
-                }
-                else {
-                    PathCommandType prevType = commands.back().type;
-                    if (prevType == PathCommandType::CubicBezier ||
-                        prevType == PathCommandType::SmoothCubicBezier) {
-                        // phản chiếu control cuối qua current point
-                        x1 = 2.0f * currentX - lastCtrlX;
-                        y1 = 2.0f * currentY - lastCtrlY;
-                    }
-                    else {
-                        x1 = currentX;
-                        y1 = currentY;
-                    }
-                }
-
-                if (isRel) {
-                    x2 += currentX; y2 += currentY;
-                    x += currentX; y += currentY;
-                }
-
-                PathCommand pc;
-                pc.type = PathCommandType::SmoothCubicBezier;
-                pc.params = { x1, y1, x2, y2, x, y };
-                commands.push_back(pc);
-
-                lastCtrlX = x2;
-                lastCtrlY = y2;
-                currentX = x;
-                currentY = y;
             }
+
+            if (isRel) {
+                x2 += currentX; y2 += currentY;
+                x += currentX; y += currentY;
+            }
+
+            PathCommand pc;
+            pc.type = PathCommandType::SmoothCubicBezier;
+            // Lưu luôn 3 điểm để render cho dễ
+            pc.params = { x1, y1, x2, y2, x, y };
+            commands.push_back(pc);
+
+            lastCtrlX = x2; lastCtrlY = y2;
+            currentX = x; currentY = y;
             break;
         }
-
-                // ---------- Z / z ----------
-        case 'Z':
-        case 'z': {
+        case 'Z': {
             PathCommand pc;
             pc.type = PathCommandType::ClosePath;
             commands.push_back(pc);
-            ++pos;
+            currentX = startX; currentY = startY;
             break;
         }
-
-                // ---------- lệnh khác: bỏ qua ----------
         default:
-            ++pos;
+            ++pos; // Bỏ qua lệnh chưa hỗ trợ (Q, A...)
             break;
         }
     }
 }
+
 void SVGPath::render(SVGRenderer& r, Gdiplus::Graphics& g) const {
     r.renderPath(g, this);
 }

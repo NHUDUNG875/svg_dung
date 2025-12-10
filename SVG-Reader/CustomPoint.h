@@ -6,6 +6,7 @@ namespace Gdiplus {
 	struct Point;  
 }
 struct CustomPoint {
+
 	float x, y;
 	CustomPoint();
 	CustomPoint(float, float);

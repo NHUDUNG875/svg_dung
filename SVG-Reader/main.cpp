@@ -30,7 +30,7 @@ using namespace std;
 #pragma comment (lib,"kernel32.lib")
 #endif
 
-const std::string SVG_FILENAME = "D:/Download/svg-18.svg";
+const std::string SVG_FILENAME = "D:/Download/svg-09.svg";
 const LPCWSTR WINDOW_CLASS_NAME = L"SVGReaderWindow";
 const LPCWSTR WINDOW_TITLE = L"SVG Reader Demo";
 
@@ -42,13 +42,13 @@ SVGParser g_parser;
 SVGRenderer g_renderer;
 SVGFactoryPattern g_factory; 
 ULONG_PTR gdiplusToken;
-
 VOID OnPaint(HWND hWnd) {
 	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(hWnd, &ps);	Graphics graphics(hdc);
+	HDC hdc = BeginPaint(hWnd, &ps);
+	Graphics graphics(hdc);
 
 	graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-	graphics.Clear(Gdiplus::Color(255, 255, 255)); 
+	graphics.Clear(Gdiplus::Color(255, 255, 255));
 
 	if (g_svgDocument && g_svgDocument->getRootGroup()) {
 		RECT clientRect;
@@ -56,15 +56,44 @@ VOID OnPaint(HWND hWnd) {
 		float viewportW = (float)clientRect.right;
 		float viewportH = (float)clientRect.bottom;
 
-		float viewBoxW = 1500.0f; 
-		float viewBoxH = 750.0f; 
+		// 1. Lấy thông tin kích thước và ViewBox
+		float docW = g_svgDocument->getWidth();
+		float docH = g_svgDocument->getHeight();
+		SVGViewBox vb = g_svgDocument->getViewBox();
 
-		float scaleX = viewportW / viewBoxW;
-		float scaleY = viewportH / viewBoxH;
-		float scale = std::min(scaleX, scaleY);
+		// Nếu không có viewBox hợp lệ, giả lập viewBox từ width/height
+		if (!vb.isValid()) {
+			vb.x = 0; vb.y = 0;
+			vb.width = docW > 0 ? docW : 800.0f;
+			vb.height = docH > 0 ? docH : 600.0f;
+		}
 
+		// 2. Tính tỷ lệ Scale (Fit to screen)
+		float scaleX = viewportW / vb.width;
+		float scaleY = viewportH / vb.height;
+		float scale = std::min(scaleX, scaleY); // Giữ tỷ lệ khung hình
+
+		// 3. Tính toán vị trí để căn giữa (Centering)
+		// Kích thước thực tế sau khi zoom
+		float finalW = vb.width * scale;
+		float finalH = vb.height * scale;
+
+		float offsetX = (viewportW - finalW) / 2.0f;
+		float offsetY = (viewportH - finalH) / 2.0f;
+
+		// 4. Áp dụng Transform (Thứ tự rất quan trọng!)
+
+		// B1: Dịch chuyển vùng vẽ ra giữa màn hình
+		graphics.TranslateTransform(offsetX, offsetY);
+
+		// B2: Phóng to/Thu nhỏ
 		graphics.ScaleTransform(scale, scale);
 
+		// B3: Dịch chuyển ngược lại theo min-x, min-y của viewBox
+		// (Để điểm (vb.x, vb.y) trùng với gốc tọa độ 0,0 mới)
+		graphics.TranslateTransform(-vb.x, -vb.y);
+
+		// Render
 		g_svgDocument->renderSVGImage(g_renderer, graphics);
 	}
 	EndPaint(hWnd, &ps);

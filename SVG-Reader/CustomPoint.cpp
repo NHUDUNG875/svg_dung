@@ -1,23 +1,22 @@
-#include "CustomPoint.h"
+﻿#include "CustomPoint.h"
 #include <cmath>
 
-CustomPoint::CustomPoint() {
-    x = 0.0f;
-    y = 0.0f;
+CustomPoint::CustomPoint() : x(0.0f), y(0.0f) {} // Dùng initializer list tốt hơn
+
+CustomPoint::CustomPoint(float temp_x, float temp_y) : x(temp_x), y(temp_y) {}
+
+// --- SỬA LỖI LOGIC TẠI ĐÂY ---
+float CustomPoint::distanceTo(const CustomPoint& other) const {
+    float dx = x - other.x;
+    float dy = y - other.y;
+    return std::sqrt(dx * dx + dy * dy);
 }
-CustomPoint::CustomPoint(float temp_x, float temp_y) {
-    x = temp_x;
-    y = temp_y;
-};
-float CustomPoint::distanceTo(const CustomPoint&) const {
-    return std::sqrt(x * x + y * y);
-}
+// -----------------------------
+
 CustomPoint::operator Gdiplus::PointF() const {
     return Gdiplus::PointF(x, y);
 }
-CustomPoint::operator Gdiplus::Point() const {
-    return Gdiplus::Point(static_cast<int>(x), static_cast<int>(y));
-}
-// subsequent development
-// CustomPoint& transform(Matrix* m);
 
+CustomPoint::operator Gdiplus::Point() const {
+    return Gdiplus::Point(static_cast<INT>(x), static_cast<INT>(y));
+}

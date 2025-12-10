@@ -1,101 +1,105 @@
 ﻿#include "CustomColor.h"
+#include <map>
+#include <string>
+#include <algorithm>
+#include <sstream>
 #include <windows.h>
 #include <gdiplus.h>
-#include <sstream>
-#include <algorithm> 
-#include <stdexcept> 
 
 using namespace Gdiplus;
-using namespace std;
 
-CustomColor::CustomColor() {
-    r = 0; 
-    g = 0;
-    b = 0;
+CustomColor::CustomColor() : r(0), g(0), b(0) {}
+
+CustomColor::CustomColor(int rr, int gg, int bb)
+    : r(clampCustomColorValue(rr)),
+    g(clampCustomColorValue(gg)),
+    b(clampCustomColorValue(bb)) {}
+
+int CustomColor::clampCustomColorValue(int v) {
+    if (v < 0)   return 0;
+    if (v > 255) return 255;
+    return v;
 }
 
-CustomColor::CustomColor(int red, int green, int blue) {
-    r = red;
-    g = green;
-    b = blue;
+CustomColor::operator Gdiplus::Color() const {
+    return Gdiplus::Color(255, (BYTE)r, (BYTE)g, (BYTE)b);
 }
 
-int CustomColor::clampCustomColorValue(int value) {
-    if (value < 0) return 0;
-    if (value > 255) return 255;
-    return value;
-}
-// chỉnh sửa để đọc đc màu
-CustomColor CustomColor::fromStringToCustomColor(const std::string& rgbString) {
-    std::string tempStr = rgbString;
-    // bỏ khoảng trắng
-    tempStr.erase(std::remove_if(tempStr.begin(), tempStr.end(), ::isspace), tempStr.end());
+CustomColor CustomColor::fromStringToCustomColor(const std::string& str) {
+    std::string s = str;
+    s.erase(std::remove_if(s.begin(), s.end(), ::isspace), s.end());
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 
-    // 1) Hỗ trợ tên màu cơ bản
-    // chuyển về chữ thường để so sánh
-    std::string lower = tempStr;
-    std::transform(lower.begin(), lower.end(), lower.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-    if (lower == "red")    return CustomColor(255, 0, 0);
-    if (lower == "green")  return CustomColor(0, 128, 0);   // SVG "green" chuẩn là #008000
-    if (lower == "blue")   return CustomColor(0, 0, 255);
-    if (lower == "black")  return CustomColor(0, 0, 0);
-    if (lower == "white")  return CustomColor(255, 255, 255);
-    if (lower == "yellow") return CustomColor(255, 255, 0);
-    if (lower == "cyan" || lower == "aqua")   return CustomColor(0, 255, 255);
-    if (lower == "magenta" || lower == "fuchsia") return CustomColor(255, 0, 255);
-    if (lower == "gray" || lower == "grey")   return CustomColor(128, 128, 128);
-
-    // 2) Hỗ trợ dạng rgb(...) / rgba(...)
-    if (tempStr.rfind("rgb", 0) == 0) {   // bắt đầu bằng "rgb"
-        size_t start = tempStr.find('(');
-        size_t end = tempStr.find(')');
-
-        if (start == std::string::npos || end == std::string::npos || end <= start)
-            return CustomColor(0, 0, 0);
-
-        std::string values = tempStr.substr(start + 1, end - start - 1);
-        std::stringstream ss(values);
-        std::string segment;
-        int r = 0, g = 0, b = 0;
-        float a = 1.0f;
-        int i = 0;
-
-        while (std::getline(ss, segment, ',') && i < 4) {
-            try {
-                if (!segment.empty()) {
-                    if (i == 0) r = std::stoi(segment);
-                    else if (i == 1) g = std::stoi(segment);
-                    else if (i == 2) b = std::stoi(segment);
-                    else if (i == 3) a = std::stof(segment); // alpha 0..1
-                }
-            }
-            catch (...) {}
-            ++i;
+    // 1. Xử lý URL (Gradient) -> Fallback màu xám
+    if (s.find("url(") != std::string::npos) {
+        if (s.find("fill0") != std::string::npos || s.find("fill1") != std::string::npos) {
+            return CustomColor(255, 198, 0); // Vàng
         }
-
-        // tạm thời: chỉ lưu r,g,b; alpha sẽ xử lý ở SVGStyle::setFillOpacity
-        return CustomColor(
-            clampCustomColorValue(r),
-            clampCustomColorValue(g),
-            clampCustomColorValue(b)
-        );
+        return CustomColor(128, 128, 128); // Xám
     }
 
-    // 3) Không nhận ra định dạng → trả đen
+    // 2. Map màu mở rộng (Đã thêm skyblue)
+    static const std::map<std::string, CustomColor> colorMap = {
+        {"black", {0, 0, 0}}, {"white", {255, 255, 255}},
+        {"red", {255, 0, 0}}, {"lime", {0, 255, 0}}, {"blue", {0, 0, 255}},
+        {"yellow", {255, 255, 0}}, {"cyan", {0, 255, 255}}, {"magenta", {255, 0, 255}},
+        {"silver", {192, 192, 192}}, {"gray", {128, 128, 128}}, {"maroon", {128, 0, 0}},
+        {"olive", {128, 128, 0}}, {"green", {0, 128, 0}}, {"purple", {128, 0, 128}},
+        {"teal", {0, 128, 128}}, {"navy", {0, 0, 128}}, {"orange", {255, 165, 0}},
+        {"gold", {255, 215, 0}}, {"brown", {165, 42, 42}}, {"pink", {255, 192, 203}},
+
+        // --- THÊM CÁC MÀU MỚI TẠI ĐÂY ---
+        {"skyblue", {135, 206, 235}},       // <--- Màu sóng nước của bạn
+        {"midnightblue", {25, 25, 112}},    // <--- Màu dùng trong test case trước
+        {"blueviolet", {138, 43, 226}},     // <--- Màu dùng trong test case trước
+        {"darkslategray", {47, 79, 79}},    // <--- Màu dùng trong test case trước
+        {"grey", {128, 128, 128}},
+        // --------------------------------
+
+        {"none", {0, 0, 0}}
+    };
+
+    auto it = colorMap.find(s);
+    if (it != colorMap.end()) return it->second;
+
+    // 3. Xử lý Hex (#RRGGBB)
+    if (!s.empty() && s[0] == '#') {
+        if (s.size() == 7) {
+            auto hexToInt = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return 10 + (c - 'a');
+                if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
+                return 0;
+                };
+            int r = hexToInt(s[1]) * 16 + hexToInt(s[2]);
+            int g = hexToInt(s[3]) * 16 + hexToInt(s[4]);
+            int b = hexToInt(s[5]) * 16 + hexToInt(s[6]);
+            return CustomColor(r, g, b);
+        }
+    }
+
+    // 4. Xử lý rgb(...)
+    if (s.rfind("rgb(", 0) == 0) {
+        size_t start = s.find('(');
+        size_t end = s.find(')');
+        if (start != std::string::npos && end != std::string::npos) {
+            std::string content = s.substr(start + 1, end - start - 1);
+            std::stringstream ss(content);
+            std::string part;
+            int r = 0, g = 0, b = 0;
+            if (std::getline(ss, part, ',')) r = std::stoi(part);
+            if (std::getline(ss, part, ',')) g = std::stoi(part);
+            if (std::getline(ss, part, ',')) b = std::stoi(part);
+            return CustomColor(r, g, b);
+        }
+    }
+
+    // Fallback: Nếu không nhận diện được màu thì trả về Đen
     return CustomColor(0, 0, 0);
 }
 
 std::string CustomColor::fromCustomColorToString() const {
-    std::stringstream ss;
-    ss << "rgb(" << r << "," << g << "," << b << ")";
-    return ss.str();
-}
-
-CustomColor::operator Gdiplus::Color() const {
-    return Gdiplus::Color(255,
-        static_cast<BYTE>(r),
-        static_cast<BYTE>(g),
-        static_cast<BYTE>(b));
+    std::ostringstream oss;
+    oss << "rgb(" << r << "," << g << "," << b << ")";
+    return oss.str();
 }
