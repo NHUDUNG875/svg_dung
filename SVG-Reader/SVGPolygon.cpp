@@ -1,6 +1,10 @@
-#include "SVGPolygon.h"
+﻿#include "SVGPolygon.h"
 #include "tinyxml2.h"
 #include "SVGRenderer.h"
+#include <sstream>  // Sửa lỗi C2079: 'ss' uses undefined class
+#include <string>
+#include <vector>
+#include <algorithm> // Cần cho std::replace
 
 SVGPolygon::SVGPolygon() : SVGPolyshapeBase() {
     this->setTagName("polygon");

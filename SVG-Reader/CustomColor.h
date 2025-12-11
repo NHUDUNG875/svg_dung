@@ -1,8 +1,7 @@
 #pragma once
-#include <cmath>
-#include <algorithm>
 #include <string>
-#include <sstream>
+#include <algorithm>
+#include <map>
 
 namespace Gdiplus {
     class Color;

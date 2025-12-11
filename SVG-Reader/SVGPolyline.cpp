@@ -1,6 +1,10 @@
-#include "SVGPolyline.h"
+﻿#include "SVGPolyline.h"
 #include "tinyxml2.h"
 #include "SVGRenderer.h"
+#include <sstream>  // Sửa lỗi thiếu thư viện
+#include <string>
+#include <vector>
+#include <algorithm>
 
 SVGPolyline::SVGPolyline() : SVGPolyshapeBase() {
     this->setTagName("polyline");

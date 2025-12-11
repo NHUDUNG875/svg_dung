@@ -10,8 +10,10 @@ public:
 	CustomColor strokeColor;
 	float strokeWidth;
 	float strokeOpacity;
+	float miterLimit;
 
 	Stroke();
+	Stroke(CustomColor, float, float, float miter = 4.0f);
 	Stroke(CustomColor, float, float);
 	Stroke(const Stroke&);
 	Stroke& operator=(const Stroke&);

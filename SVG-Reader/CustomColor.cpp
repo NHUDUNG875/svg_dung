@@ -32,31 +32,29 @@ CustomColor CustomColor::fromStringToCustomColor(const std::string& str) {
 
     // 1. Xử lý URL (Gradient) -> Fallback màu xám
     if (s.find("url(") != std::string::npos) {
-        if (s.find("fill0") != std::string::npos || s.find("fill1") != std::string::npos) {
-            return CustomColor(255, 198, 0); // Vàng
-        }
-        return CustomColor(128, 128, 128); // Xám
+        if (s.find("fill0") != std::string::npos || s.find("fill1") != std::string::npos)
+            return CustomColor(255, 198, 0); // Gold
+        return CustomColor(192, 192, 192); // Gray fallback
     }
 
     // 2. Map màu mở rộng (Đã thêm skyblue)
     static const std::map<std::string, CustomColor> colorMap = {
-        {"black", {0, 0, 0}}, {"white", {255, 255, 255}},
-        {"red", {255, 0, 0}}, {"lime", {0, 255, 0}}, {"blue", {0, 0, 255}},
-        {"yellow", {255, 255, 0}}, {"cyan", {0, 255, 255}}, {"magenta", {255, 0, 255}},
-        {"silver", {192, 192, 192}}, {"gray", {128, 128, 128}}, {"maroon", {128, 0, 0}},
-        {"olive", {128, 128, 0}}, {"green", {0, 128, 0}}, {"purple", {128, 0, 128}},
-        {"teal", {0, 128, 128}}, {"navy", {0, 0, 128}}, {"orange", {255, 165, 0}},
-        {"gold", {255, 215, 0}}, {"brown", {165, 42, 42}}, {"pink", {255, 192, 203}},
-
-        // --- THÊM CÁC MÀU MỚI TẠI ĐÂY ---
-        {"skyblue", {135, 206, 235}},       // <--- Màu sóng nước của bạn
-        {"midnightblue", {25, 25, 112}},    // <--- Màu dùng trong test case trước
-        {"blueviolet", {138, 43, 226}},     // <--- Màu dùng trong test case trước
-        {"darkslategray", {47, 79, 79}},    // <--- Màu dùng trong test case trước
-        {"grey", {128, 128, 128}},
-        // --------------------------------
-
-        {"none", {0, 0, 0}}
+            {"black", {0, 0, 0}}, {"white", {255, 255, 255}},
+            {"red", {255, 0, 0}}, {"lime", {0, 255, 0}}, {"blue", {0, 0, 255}},
+            {"yellow", {255, 255, 0}}, {"cyan", {0, 255, 255}}, {"magenta", {255, 0, 255}},
+            {"silver", {192, 192, 192}}, {"gray", {128, 128, 128}}, {"grey", {128, 128, 128}},
+            {"maroon", {128, 0, 0}}, {"olive", {128, 128, 0}}, {"green", {0, 128, 0}},
+            {"purple", {128, 0, 128}}, {"teal", {0, 128, 128}}, {"navy", {0, 0, 128}},
+            {"orange", {255, 165, 0}}, {"gold", {255, 215, 0}}, {"brown", {165, 42, 42}},
+            {"pink", {255, 192, 203}},
+            // Màu đặc biệt trong các file SVG của bạn
+            {"deepskyblue", {0, 191, 255}},
+            {"skyblue", {135, 206, 235}},
+            {"midnightblue", {25, 25, 112}},
+            {"blueviolet", {138, 43, 226}},
+            {"darkslategray", {47, 79, 79}},
+            {"darkmagenta", {139, 0, 139}},
+            {"none", {0, 0, 0}}
     };
 
     auto it = colorMap.find(s);

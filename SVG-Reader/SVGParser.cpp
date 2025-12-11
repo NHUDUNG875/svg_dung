@@ -249,6 +249,19 @@ void SVGParser::parseAttributes(tinyxml2::XMLElement* xmlNode, SVGElement* eleme
                 else if (name == "stroke-opacity") try { s->strokeOpacity = std::stof(value); } catch (...) {}
             }
         }
+        else if (name == "font-style") {
+            if (value == "italic") {
+                // Dùng bitwise OR để kết hợp style (2 là giá trị của FontStyleItalic trong GDI+)
+                currentStyle.setFontStyle(currentStyle.getFontStyle() | 2);
+            }
+        }
+        else if (name == "font-weight") {
+            if (value == "bold" || value == "bolder" || value == "700") {
+                // Dùng bitwise OR để kết hợp style (1 là giá trị của FontStyleBold)
+                currentStyle.setFontStyle(currentStyle.getFontStyle() | 1);
+            }
+        }
+        std::string fillRule;
         attr = attr->Next();
     }
 
