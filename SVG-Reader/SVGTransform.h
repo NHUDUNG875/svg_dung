@@ -11,7 +11,7 @@ enum class TransformType { Translate, Rotate, Scale };
 
 struct TransformOp {
     TransformType type;
-    float a, b; 
+    float a, b;
 };
 
 class SVGTransform {
@@ -25,7 +25,7 @@ public:
 
     }
     void addRotate(float deg) {
-        ops.push_back({TransformType::Rotate, deg, 0.0f});
+        ops.push_back({ TransformType::Rotate, deg, 0.0f });
     }
     void addScale(float sx, float sy) {
         ops.push_back({ TransformType::Scale, sx, sy });
@@ -35,4 +35,3 @@ public:
 
     static SVGTransform parse(const std::string& str); // parse chuỗi "translate(...) rotate(...) ..."
 };
-

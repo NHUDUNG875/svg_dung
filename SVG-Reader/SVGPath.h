@@ -19,7 +19,7 @@ enum class PathCommandType {
 
 struct PathCommand {
     PathCommandType type;
-    vector<float> params; 
+    vector<float> params;
 };
 
 class SVGPath : public SVGElement {
@@ -31,7 +31,7 @@ public:
     SVGElement* clone() const override;
 
     void parse(tinyxml2::XMLElement* node) override;
-    void render(SVGRenderer& r,Graphics& g) const override;
+    void render(SVGRenderer& r, Graphics& g) const override;
 
     const vector<PathCommand>& getCommands() const { return commands; }
 };

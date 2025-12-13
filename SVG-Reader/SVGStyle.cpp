@@ -1,56 +1,52 @@
 ﻿#include "SVGStyle.h"
-// Include Windows/GDI+ trước để tránh xung đột
 #include <windows.h>
 #include <gdiplus.h>
-
-#include "Stroke.h" 
-#include "CustomColor.h" 
+#include "Stroke.h"
+#include "CustomColor.h"
 #include <sstream>
 #include <algorithm>
 #include <cmath>
 
 using namespace Gdiplus;
 
-// Constructor mặc định (Gộp chung logic khởi tạo)
+// 1. Constructor mặc định: Khởi tạo textAnchor = 0 (Start/Left)
 SVGStyle::SVGStyle()
-    : fillColor(0, 0, 0), // Mặc định đen
+    : fillColor(0, 0, 0),
     fillOpacity(1.0f),
     stroke(nullptr),
     fillRule("nonzero"),
-    fontStyle(0)
-{
-}
+    fontStyle(0),
+    textAnchor(0) // <--- KHỞI TẠO
+{}
 
-// Constructor có tham số
 SVGStyle::SVGStyle(CustomColor fillC, float fillO, Stroke* s)
     : fillColor(fillC),
     fillOpacity(fillO),
     stroke(s ? new Stroke(*s) : nullptr),
     fillRule("nonzero"),
-    fontStyle(0)
-{
-}
+    fontStyle(0),
+    textAnchor(0)
+{}
 
-// Copy Constructor
+// 2. Copy Constructor: Phải copy cả textAnchor
 SVGStyle::SVGStyle(const SVGStyle& other)
     : fillColor(other.fillColor),
     fillOpacity(other.fillOpacity),
     fillRule(other.fillRule),
     fontStyle(other.fontStyle),
+    textAnchor(other.textAnchor), // <--- COPY
     stroke(other.stroke ? new Stroke(*other.stroke) : nullptr)
-{
-}
+{}
 
-// Copy Assignment Operator
+// 3. Operator=: Phải gán textAnchor
 SVGStyle& SVGStyle::operator=(const SVGStyle& other) {
     if (this != &other) {
-        // Xóa stroke cũ trước khi copy mới để tránh leak memory
         delete this->stroke;
-
         this->fillColor = other.fillColor;
         this->fillOpacity = other.fillOpacity;
         this->fillRule = other.fillRule;
         this->fontStyle = other.fontStyle;
+        this->textAnchor = other.textAnchor; // <--- GÁN
         this->stroke = other.stroke ? new Stroke(*other.stroke) : nullptr;
     }
     return *this;

@@ -48,7 +48,7 @@ void SVGElement::setSVGStyle(const SVGStyle& svg_style) {
 // polymorphism and separation of concerns
 void SVGElement::parse(tinyxml2::XMLElement* node) {
     // assume that: g_parser is global variable
-    extern SVGParser g_parser; 
+    extern SVGParser g_parser;
     g_parser.parseAttributes(node, this);
 }
 

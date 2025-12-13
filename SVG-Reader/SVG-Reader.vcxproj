@@ -138,60 +138,53 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CustomColor.h" />
-    <ClInclude Include="CustomPoint.h" />
-    <ClInclude Include="Stroke.h" />
-    <ClInclude Include="SVGCircle.h" />
-    <ClInclude Include="SVGDocument.h" />
-    <ClInclude Include="SVGElement.h" />
-    <ClInclude Include="SVGEllipse.h" />
-    <ClInclude Include="SVGFactoryPattern.h" />
-    <ClInclude Include="SVGGroup.h" />
-    <ClInclude Include="SVGLine.h" />
-    <ClInclude Include="SVGParser.h" />
-    <ClInclude Include="SVGPath.h" />
-    <ClInclude Include="SVGPolygon.h" />
-    <ClInclude Include="SVGPolyline.h" />
-    <ClInclude Include="SVGPolyshapeBase.h" />
-    <ClInclude Include="SVGRectangle.h" />
-    <ClInclude Include="SVGRenderer.h" />
-    <ClInclude Include="SVGSquare.h" />
-    <ClInclude Include="SVGStyle.h" />
-    <ClInclude Include="SVGText.h" />
-    <ClInclude Include="SVGTransform.h" />
-    <ClInclude Include="SVGViewBox.h" />
-    <ClInclude Include="tinyxml2.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\CustomColor.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\CustomPoint.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\Stroke.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGDocument.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGElement.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGEllipse.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGFactoryPattern.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGGroup.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGLine.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGParser.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPath.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolygon.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolyline.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolyshapeBase.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRectangle.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRenderer.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGSquare.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGText.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGTransform.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGViewBox.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\tinyxml2.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CustomColor.cpp" />
-    <ClCompile Include="CustomPoint.cpp" />
-    <ClCompile Include="main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Stroke.cpp" />
-    <ClCompile Include="SVGCircle.cpp" />
-    <ClCompile Include="SVGDocument.cpp" />
-    <ClCompile Include="SVGElement.cpp" />
-    <ClCompile Include="SVGEllipse.cpp" />
-    <ClCompile Include="SVGFactoryPattern.cpp" />
-    <ClCompile Include="SVGGroup.cpp" />
-    <ClCompile Include="SVGLine.cpp" />
-    <ClCompile Include="SVGParser.cpp" />
-    <ClCompile Include="SVGPath.cpp" />
-    <ClCompile Include="SVGPolygon.cpp" />
-    <ClCompile Include="SVGPolyline.cpp" />
-    <ClCompile Include="SVGPolyshapeBase.cpp" />
-    <ClCompile Include="SVGRectangle.cpp" />
-    <ClCompile Include="SVGRenderer.cpp" />
-    <ClCompile Include="SVGSquare.cpp" />
-    <ClCompile Include="SVGStyle.cpp" />
-    <ClCompile Include="SVGText.cpp" />
-    <ClCompile Include="SVGTransform.cpp" />
-    <ClCompile Include="SVGViewBox.cpp" />
-    <ClCompile Include="tinyxml2.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\CustomColor.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\CustomPoint.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\main.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\Stroke.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGCircle.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGDocument.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGElement.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGEllipse.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGFactoryPattern.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGGroup.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGLine.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGParser.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPath.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolygon.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolyline.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGPolyshapeBase.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRectangle.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRenderer.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGSquare.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGStyle.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGText.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGTransform.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGViewBox.cpp" />
+    <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\tinyxml2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

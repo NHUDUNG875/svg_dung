@@ -1,7 +1,7 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 #include "SVGStyle.h"
-#include "SVGTransform.h"  // thêm
+#include "SVGTransform.h"  // thï¿½m
 
 class SVGRenderer;
 namespace Gdiplus { class Graphics; }
@@ -12,7 +12,7 @@ protected:
 	std::string tag_name;
 	std::string id;
 	SVGStyle style;
-	SVGTransform transform;//thêm
+	SVGTransform transform;//thï¿½m
 public:
 	SVGElement();
 	SVGElement(const std::string&, const std::string&, const SVGStyle&);
@@ -29,7 +29,7 @@ public:
 	const SVGStyle& getSVGStyle() const;
 	void setSVGStyle(const SVGStyle&);
 
-	//thêm
+	//thï¿½m
 	const SVGTransform& getTransform() const { return transform; }
 	SVGTransform& getTransform() { return transform; }
 	void setTransform(const SVGTransform& t) { transform = t; }
