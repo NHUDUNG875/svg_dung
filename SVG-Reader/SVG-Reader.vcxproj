@@ -155,10 +155,12 @@
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRectangle.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGRenderer.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGSquare.h" />
+    <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGStyle.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGText.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGTransform.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGViewBox.h" />
     <ClInclude Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\tinyxml2.h" />
+    <ClInclude Include="SVGGradient.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\CustomColor.cpp" />
@@ -185,6 +187,7 @@
     <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGTransform.cpp" />
     <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\SVGViewBox.cpp" />
     <ClCompile Include="..\..\..\..\svg_dung-master\svg_dung-master\SVG-Reader\tinyxml2.cpp" />
+    <ClCompile Include="SVGGradient.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
